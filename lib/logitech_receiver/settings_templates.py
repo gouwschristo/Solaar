@@ -1125,7 +1125,7 @@ class ExtendedAdjustableDpi(settings.Setting):
                 dpilist_y = produce_dpi_list(setting_class.feature, 0x20, 3, device, 1)
                 choices_map[setting_class.keys["Y"]] = common.NamedInts.list(dpilist_y)
             if lod:
-                choices_map[setting_class.keys["LOD"]] = common.NamedInts(LOW=0, MEDIUM=1, HIGH=2)
+                choices_map[setting_class.keys["LOD"]] = common.NamedInts(LOW=1, MEDIUM=2, HIGH=3)
             validator = cls(choices_map=choices_map, byte_count=2, write_prefix_bytes=b"\x00")
             validator.y = y
             validator.lod = lod

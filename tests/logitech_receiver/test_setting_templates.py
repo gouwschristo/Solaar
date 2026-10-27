@@ -829,7 +829,7 @@ key_tests = [
         {
             common.NamedInt(0, "X"): common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164, 0x01C4]),
             common.NamedInt(1, "Y"): common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164]),
-            common.NamedInt(2, "LOD"): common.NamedInts(LOW=0, MEDIUM=1, HIGH=2),
+            common.NamedInt(2, "LOD"): common.NamedInts(LOW=1, MEDIUM=2, HIGH=3),
         },
         fake_hidpp.Response("000003", 0x0910, "00"),  # supports y direction and lod
         fake_hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000000"),
@@ -840,6 +840,26 @@ key_tests = [
         fake_hidpp.Response("000064007400E4007401", 0x0950),
         fake_hidpp.Response("00006400E401", 0x0960, "00006400E401"),
         fake_hidpp.Response("000064016401", 0x0960, "000064016401"),
+    ),
+    # Regression for the LOD encoding: the device reports 1 = LOW, 2 = MEDIUM,
+    # 3 = HIGH, so a mouse set to "HIGH" sends 3 and must validate (before the
+    # fix the validator only knew 0/1/2 and raised on 3).
+    Setup(
+        FeatureTest(settings_templates.ExtendedAdjustableDpi, {0: 0x64, 1: 0xE4, 2: 3}, {1: 0x164}, 2, offset=0x9),
+        {
+            common.NamedInt(0, "X"): common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164, 0x01C4]),
+            common.NamedInt(1, "Y"): common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164]),
+            common.NamedInt(2, "LOD"): common.NamedInts(LOW=1, MEDIUM=2, HIGH=3),
+        },
+        fake_hidpp.Response("000003", 0x0910, "00"),  # supports y direction and lod
+        fake_hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000000"),
+        fake_hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000001"),
+        fake_hidpp.Response("00000000000000000000000000000000", 0x0920, "000002"),
+        fake_hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000100"),
+        fake_hidpp.Response("000001E4E0400124E040016400000000", 0x0920, "000101"),
+        fake_hidpp.Response("000064007400E4007403", 0x0950),
+        fake_hidpp.Response("00006400E403", 0x0960, "00006400E403"),
+        fake_hidpp.Response("000064016403", 0x0960, "000064016403"),
     ),
 ]
 
